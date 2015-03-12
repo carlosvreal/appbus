@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="@color/material_primary"
+    android:padding="5sp"
+    >
+
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:hint="Street..."
+        android:id="@+id/edittextContentSearch"
+        android:layout_toLeftOf="@+id/buttonSearch"
+        android:maxLines="1"
+        android:singleLine="true"
+        style="Widget.AppCompat.EditText"
+         />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:textAllCaps="true"
+        android:text="Search"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        style="?android:attr/borderlessButtonStyle"
+        android:id="@+id/buttonSearch"/>
+
+
+</RelativeLayout>

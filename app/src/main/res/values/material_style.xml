@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+     <style name="StyleActionBar" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/material_white_text</item>
+        <item name="actionMenuTextColor">@color/material_primary_text</item>
+        <item name="android:textColorSecondary">@color/material_white_text</item>
+    </style>
+
+</resources>
