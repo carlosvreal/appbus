@@ -4,28 +4,22 @@
     <string name="title_activity_bus_maps">Map</string>
     <string name="title_activity_list_main">Search Routes</string>
     <string name="msg_error_empty_field">Field search is empty.</string>
-    <string name="msg_connectionless">Connectionless. Verify your network connection please.</string>
+    <string name="msg_connectionless">Connection is not available. Verify your network connection please.</string>
 
     <string name="title_warning">Warning</string>
-    <string name="msg_without_result_search">Sorry, we don\'t find your search.</string>
+    <string name="msg_without_result_search">Sorry, we do not find your search.</string>
     <string name="title_activity_detail_main">DetailMainActivity</string>
 
-
-    <string name="title_section1">WeekDay</string>
-    <string name="title_section2">Saturday</string>
-    <string name="title_section3">Sunday</string>
-
-
     <string name="action_settings">Settings</string>
-    <string name="title_activity_timetable_detail">TimetableDetailActivity</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="title_timetable">Timetable Route</string>
-    <string name="button_back">Back</string>
     <string name="title_routes">Track</string>
     <string name="title_weekday">Weekday</string>
     <string name="title_saturday">Saturday</string>
     <string name="title_sunday">Sunday</string>
     <string name="SP_BUS">com.appbus</string>
-    <string name="percent_character">%</string>
+    <string name="title_result_load">Result</string>
+    <string name="msg_loading_alert">Loading data..</string>
+    <string name="title_item_menu_mapa">Map</string>
+    <string name="hint_search_filed">Street</string>
+    <string name="title_search_button">Search</string>
+    <string name="title_msg_load_routes">Loading routes</string>
 </resources>

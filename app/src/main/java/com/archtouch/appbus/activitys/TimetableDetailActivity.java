@@ -28,10 +28,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.neokree.materialtabs.MaterialTab;
-import it.neokree.materialtabs.MaterialTabHost;
-import it.neokree.materialtabs.MaterialTabListener;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -39,14 +35,11 @@ import rx.schedulers.Schedulers;
 
 public class TimetableDetailActivity extends ActionBarActivity {
 
-//    private MaterialTabHost tabHost;
-//    private ViewPager pager;
-//    private ViewPagerAdapter adapter;
+    private static final String WEEKDAY = "weekday";
+    private static final String SATURDAY = "saturday";
+    private static final String SUNDAY = "sunday";
 
     private ViewPagerAdapter adapter;
-    private PagerSlidingTabStrip tabs;
-    private ViewPager pager;
-
     private Toolbar mToolBar;
     private Route route;
 
@@ -63,35 +56,32 @@ public class TimetableDetailActivity extends ActionBarActivity {
         route.setLongName(getIntent().getExtras().getString(ListMainActivity.ROUTE_NAME));
         route.setId(getIntent().getExtras().getInt(ListMainActivity.ROUTE_ID));
 
-        loadToolbar();
+        initToolbar();
 
         requestListStreets();
-
-//        initTab();
+//        requestListTimetable();
+//        initTabsDetail();
     }
 
-    public void initTab(){
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+    private void initToolbar() {
+        mToolBar = (Toolbar) findViewById(R.id.screen_default_toolbar);
+        mToolBar.setTitle(route.getLongName());
 
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        pager.setAdapter(adapter);
-        tabs.setViewPager(pager);
-
-        pager.setCurrentItem(1);
-        tabs.setOnTabReselectedListener(new PagerSlidingTabStrip.OnTabReselectedListener() {
-            @Override
-            public void onTabReselected(int position) {
-
-            }
-        });
+        if (mToolBar != null) {
+            setSupportActionBar(mToolBar);
+        }
+        if (mToolBar != null) {
+            mToolBar.setNavigationIcon(R.drawable.ic_back);
+        }
     }
 
+    /**
+     * Request list streets route
+     */
     private void requestListStreets() {
 
         Utils.showProgressDialog("Loading data...", this);
 
-        //json body search
         JsonDataSearch paramRouteName = new JsonDataSearch();
         paramRouteName.setParamsObject(new SearchRoute(route.getId()));
 
@@ -104,21 +94,26 @@ public class TimetableDetailActivity extends ActionBarActivity {
                 finallyDo(new Action0() {
                     @Override
                     public void call() {
-//                        Utils.dismissProgressDialog();
                     }
                 }).subscribe(new Action1<StreetResponse>() {
             @Override
             public void call(StreetResponse temp) {
-                loadStreets(temp.getRows());
+                Utils.dismissProgressDialog();
+
+                listStreets = temp.getRows();
+
+                requestListTimetable();
             }
         }, AppBusNetwork.newThrowableAction1());
     }
 
+    /**
+     * Request list of timetable route
+     */
     private void requestListTimetable() {
 
-        Utils.showProgressDialog("Loading data..", this);
+        Utils.showProgressDialog(getString(R.string.msg_loading_alert), this);
 
-        //json body search
         JsonDataSearch paramRouteName = new JsonDataSearch();
         paramRouteName.setParamsObject(new SearchRoute(route.getId()));
 
@@ -131,40 +126,30 @@ public class TimetableDetailActivity extends ActionBarActivity {
                 finallyDo(new Action0() {
                     @Override
                     public void call() {
-//                        Utils.dismissProgressDialog();
                     }
                 }).subscribe(new Action1<TimetableResponse>() {
             @Override
             public void call(TimetableResponse temp) {
-                loadTimetable(temp.getRows());
+
+                Utils.dismissProgressDialog();
+                listTimetables = temp.getRows();
+                initTabsDetail();
             }
         }, AppBusNetwork.newThrowableAction1());
     }
 
-    private void loadStreets(List<Street> list) {
-        listStreets = list;
-        requestListTimetable();
-    }
+    /**
+     * init tabs Routes, Weekday, saturday and sunday
+     */
+    private void initTabsDetail(){
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
 
-    private void loadTimetable(List<Timetable> list) {
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(adapter);
+        tabs.setViewPager(pager);
 
-        Utils.dismissProgressDialog();
-
-        listTimetables = list;
-
-        initTab();
-    }
-
-    private void loadToolbar() {
-        mToolBar = (Toolbar) findViewById(R.id.screen_default_toolbar);
-        mToolBar.setTitle(route.getLongName());
-
-        if (mToolBar != null) {
-            setSupportActionBar(mToolBar);
-        }
-        if (mToolBar != null) {
-            mToolBar.setNavigationIcon(R.drawable.ic_back);
-        }
+        pager.setCurrentItem(0);
     }
 
     @Override
@@ -176,15 +161,22 @@ public class TimetableDetailActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private List<Timetable> filterList(String filter){
-        List<Timetable> temp = new ArrayList<Timetable>();
-        for(Timetable item: listTimetables){
-            if(item.getCalendar().equalsIgnoreCase(filter))
-                temp.add(item);
+    /**
+     * Execute basic filter using
+     * @param filter
+     * @return
+     */
+    private List<Timetable> filterList(String filter) {
+        List<Timetable> temp = new ArrayList<>();
+        if (listTimetables != null){
+            for (Timetable item : listTimetables) {
+                if (item.getCalendar().equalsIgnoreCase(filter))
+                    temp.add(item);
+            }
         }
         return temp;
     }
-//
+
     public class ViewPagerAdapter extends FragmentPagerAdapter {
 
         private final String[] TITLES = {getString(R.string.title_routes), getString(R.string.title_weekday), getString(R.string.title_saturday),getString(R.string.title_sunday)};
@@ -208,11 +200,11 @@ public class TimetableDetailActivity extends ActionBarActivity {
             if (position == 0) {
                 return ListStreetsDetailFragment.newInstance(listStreets);
             } else if (position == 1) {
-                return ListTimetableFragment.newInstance(filterList("weekday"));
+                return ListTimetableFragment.newInstance(filterList(WEEKDAY));
             } else if (position == 2) {
-                return ListTimetableFragment.newInstance(filterList("saturday"));
+                return ListTimetableFragment.newInstance(filterList(SATURDAY));
             } else if(position==3) {
-                return ListTimetableFragment.newInstance(filterList("sunday"));
+                return ListTimetableFragment.newInstance(filterList(SUNDAY));
             }
             return new Fragment();
         }

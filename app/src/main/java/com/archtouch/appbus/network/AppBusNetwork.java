@@ -11,9 +11,6 @@ import com.squareup.okhttp.OkHttpClient;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
-
 import com.archtouch.appbus.network.model.JsonDataSearch;
 import com.archtouch.appbus.network.model.RouteResponse;
 import com.archtouch.appbus.network.model.StreetResponse;
@@ -26,29 +23,21 @@ import retrofit.converter.GsonConverter;
 import rx.Observable;
 import rx.functions.Action1;
 
-/**
- * Created by real on 6/3/15.
- */
+
 public class AppBusNetwork {
 
-    public static String urlBase = "https://api.appglu.com/v1/queries";
-    public static AppBusService service;
-    public static int TIME_OUT_SERVER = 10 * 1000;
+    private static final String urlBase = "https://api.appglu.com/v1/queries";
+    private static AppBusService service;
+    private static final int TIME_OUT_SERVER = 10 * 1000;
 
     static {
+        //init url base in static block, for all requests
         setBaseUrl(urlBase);
     }
 
-    public static void setBaseUrl(String baseUrl) {
+    private static void setBaseUrl(String baseUrl) {
         service = createRestAdapter(baseUrl).create(AppBusService.class);
     }
-
-    private final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    };
 
     private static RestAdapter createRestAdapter(String baseUrl) {
         return new RestAdapter.Builder()
@@ -66,8 +55,6 @@ public class AppBusNetwork {
             public void intercept(RequestFacade request) {
                 request.addHeader("Accept", "application/json");
                 request.addHeader("X-AppGlu-Environment", "staging");
-//                request.addHeader("Connection", "Keep-Alive");
-//                request.addHeader("Pragma", "no-cache");
                 String credential = Credentials.basic("WKD4N7YMA1uiM8V", "DtdTtzMLQlA0hk2C1Yi5pLyVIlAQ68");
                 request.addHeader("Authorization", credential);
             }
@@ -90,12 +77,14 @@ public class AppBusNetwork {
         OkHttpClient okHttpClient = new OkHttpClient();
         okHttpClient.setConnectTimeout(TIME_OUT_SERVER, TimeUnit.MILLISECONDS);
         okHttpClient.setReadTimeout(TIME_OUT_SERVER, TimeUnit.MILLISECONDS);
-//        okHttpClient.setHostnameVerifier(DO_NOT_VERIFY);
         return new OkClient(okHttpClient);
     }
 
+    /**
+     * static method for get error retrofit
+     * @return
+     */
     public static Action1<Throwable> newThrowableAction1() {
-//        Utils.dismissProgressDialog();
         return new Action1<Throwable>() {
             @Override
             public void call(Throwable throwable) {
@@ -104,15 +93,29 @@ public class AppBusNetwork {
         };
     }
 
-//services
+     /**
+     * interface for request findRoutesByStopName
+     * @param endpointData
+     * @return
+     */
     public static Observable<RouteResponse> findRoutesByStopName(JsonDataSearch endpointData){
         return service.findRoutesByStopName(endpointData);
     }
 
+    /**
+     * interface for request findStopsByRouteId
+     * @param endpointData
+     * @return
+     */
     public static Observable<StreetResponse> findStopsByRouteId(JsonDataSearch endpointData){
         return service.findStopsByRouteId(endpointData);
     }
 
+    /** interface for request findDeparturesByRouteId
+     *
+     * @param endpointData
+     * @return
+     */
     public static Observable<TimetableResponse> findDeparturesByRouteId(JsonDataSearch endpointData){
         return service.findDeparturesByRouteId(endpointData);
     }

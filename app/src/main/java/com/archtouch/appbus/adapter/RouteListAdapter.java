@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.archtouch.appbus.R;
@@ -16,7 +15,7 @@ import java.util.List;
 public class RouteListAdapter extends BaseAdapter {
 
     private List<Route> routes;
-    private Context mContext;
+    private final Context mContext;
 
     public RouteListAdapter(List<Route> list, Context mContext) {
         this.routes = list;
@@ -48,8 +47,6 @@ public class RouteListAdapter extends BaseAdapter {
             holder.title = (TextView) convertView.findViewById(R.id.titleTextRoute);
             holder.title.setFocusable(false);
             holder.description = (TextView) convertView.findViewById(R.id.descriptionTextRoute);
-            holder.description.setFocusable(false);
-//            holder.imageView = (ImageView) convertView.findViewById(R.id.image);
 
             convertView.setTag(holder);
         } else {
@@ -60,13 +57,11 @@ public class RouteListAdapter extends BaseAdapter {
 
         holder.title.setText("Route " + (position+1));
         holder.description.setText(route.getLongName());
-//        holder.imageView
         return convertView;
     }
 
     private static class ViewHolder {
         TextView title;
         TextView description;
-        ImageView imageView;
-    }
+   }
 }
