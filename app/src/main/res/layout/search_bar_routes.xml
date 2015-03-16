@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:hint="Street..."
+        android:hint="@string/hint_search_filed"
         android:id="@+id/edittextContentSearch"
         android:layout_toLeftOf="@+id/buttonSearch"
         android:maxLines="1"
@@ -25,11 +25,10 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:textAllCaps="true"
-        android:text="Search"
+        android:text="@string/title_search_button"
         android:textStyle="bold"
         android:textSize="16sp"
         style="?android:attr/borderlessButtonStyle"
         android:id="@+id/buttonSearch"/>
-
 
 </RelativeLayout>

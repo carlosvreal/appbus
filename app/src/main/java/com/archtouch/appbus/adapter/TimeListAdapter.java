@@ -8,14 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.archtouch.appbus.R;
-import com.archtouch.appbus.model.Street;
 import com.archtouch.appbus.model.Timetable;
 
 import java.util.List;
 
-/**
- * Created by real on 9/3/15.
- */
 public class TimeListAdapter extends BaseAdapter {
 
     private List<Timetable> timetables;

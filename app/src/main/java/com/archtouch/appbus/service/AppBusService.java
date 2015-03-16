@@ -1,6 +1,6 @@
 package com.archtouch.appbus.service;
 
-import com.archtouch.appbus.model.Route;
+
 import com.archtouch.appbus.network.model.JsonDataSearch;
 import com.archtouch.appbus.network.model.RouteResponse;
 import com.archtouch.appbus.network.model.StreetResponse;
@@ -10,9 +10,6 @@ import retrofit.http.POST;
 import rx.Observable;
 
 
-/**
- * Created by real on 6/3/15.
- */
 public interface AppBusService {
 
     //    https://api.appglu.com/v1/queries/findRoutesByStopName/run

@@ -1,5 +1,6 @@
 package com.archtouch.appbus.activitys;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
@@ -15,7 +16,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.archtouch.appbus.R;
@@ -35,13 +35,12 @@ import rx.schedulers.Schedulers;
 
 public class ListMainActivity extends ActionBarActivity {
 
-    public static final int RELOAD_SEARCH_RESULT = 456;
+    private static final int RELOAD_SEARCH_RESULT = 456;
     public static final int MAP_RESULT = 789;
 
     public static final String ROUTE_ID = "route_id";
     public static final String ROUTE_NAME = "route_name";
     public static final String STREET_NAME = "street_name_map";
-
 
     private Toolbar mToolBar;
     private RouteListAdapter adapter;
@@ -54,13 +53,11 @@ public class ListMainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_view_route_main);
 
-        loadToolbar();
-        loadSearchBar();
-        //init with dummy list - just for test
-//        loadRoutesResultSearch(fakeListRoute());
+        initToolbar();
+        initSearchBarComponent();
     }
 
-    private void loadToolbar() {
+    private void initToolbar() {
         mToolBar = (Toolbar) findViewById(R.id.screen_default_toolbar);
         mToolBar.setTitle(R.string.title_activity_list_main);
 
@@ -68,63 +65,64 @@ public class ListMainActivity extends ActionBarActivity {
             setSupportActionBar(mToolBar);
         }
         if (mToolBar != null) {
-            mToolBar.setNavigationIcon(R.mipmap.bus);
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//            getSupportActionBar().setHomeButtonEnabled(false);
+            mToolBar.setNavigationIcon(R.drawable.bus);
         }
     }
 
-    private void loadSearchBar(){
+    private void initSearchBarComponent(){
 
         searchField = (EditText) findViewById(R.id.edittextContentSearch);
+
         Button buttonSearch = (Button) findViewById(R.id.buttonSearch);
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                searchUserStreet("lauro linhares");
 
-                if(Utils.isNetworkAvailable(ListMainActivity.this) == false) {
+                ListMainActivity.this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+                if(!Utils.isNetworkAvailable(ListMainActivity.this)) {
                     Utils.alertDialogOk(getString(R.string.title_warning),getString(R.string.msg_connectionless),ListMainActivity.this);
                 } else {
                     if (searchField.getText().toString().trim().isEmpty()) {
                         Utils.alertDialogOk(getString(R.string.title_warning), getString(R.string.msg_error_empty_field), ListMainActivity.this);
                     } else {
-
                         if(routes != null)
                             routes.clear();
 
                         if(adapter != null)
                             adapter.notifyDataSetChanged();
 
-                        searchUserStreet(searchField.getText().toString());
-                        searchField.setFocusableInTouchMode(true);
+                        requestSearchRoutes(searchField.getText().toString());
                     }
                 }
             }
         });
     }
 
-    protected void searchUserStreet(String search) {
+    /**
+     * Send request for search route
+     * @param search
+     */
+    private void requestSearchRoutes(String search) {
 
-        saveDataSearch(search);
+        saveDataSearchPreference(search);
 
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        Utils.showProgressDialog("Loading routes..",this);
+        searchField.setFocusable(false);
+        Utils.showProgressDialog(getString(R.string.title_msg_load_routes), this);
 
-        //json body search
         JsonDataSearch paramRouteName = new JsonDataSearch();
         paramRouteName.setParamsObject(new SearchEndpoint(search));
 
         Gson gson = new Gson();
-        Log.d("JSON BODY: ", gson.toJson(paramRouteName).toString());
+        Log.d("JSON BODY:", gson.toJson(paramRouteName).toString());
 
+        //execute request for find routes by stopname
         AppBusNetwork.findRoutesByStopName(paramRouteName)
            .subscribeOn(Schedulers.newThread())
                .observeOn(AndroidSchedulers.mainThread()).
                     finallyDo(new Action0() {
                         @Override
                         public void call() {
-                            //                        Utils.dismissProgressDialog();
                         }
                     }).subscribe(new Action1<RouteResponse>() {
             @Override
@@ -134,49 +132,34 @@ public class ListMainActivity extends ActionBarActivity {
         }, AppBusNetwork.newThrowableAction1());
     }
 
-    private void loadRoutesResultSearch(List<Route> list){
+    /**
+     * receive list of routes and load on listview
+     * @param listRoutes
+     */
+    private void loadRoutesResultSearch(List<Route> listRoutes){
 
         Utils.dismissProgressDialog();
 
-        if(list==null || list.size() == 0) {
-            Utils.alertDialogOk("Result",getString(R.string.msg_without_result_search) ,ListMainActivity.this);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        searchField.setFocusableInTouchMode(true);
+
+        if(listRoutes == null || listRoutes.size() == 0) {
+            Utils.alertDialogOk(getString(R.string.title_result_load),getString(R.string.msg_without_result_search) ,ListMainActivity.this);
         } else {
 
-            routes = list;
-            adapter = new RouteListAdapter(list, this);
+            routes = listRoutes;
+            adapter = new RouteListAdapter(listRoutes, this);
             mListView = (ListView) findViewById(R.id.listViewRoutes);
             mListView.setAdapter(adapter);
 
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                callTimetableRoute(routes.get(position));
+                    openDetailTimetableRoute(routes.get(position));
                 }
             });
             adapter.notifyDataSetChanged();
         }
-    }
-
-    public void callTimetableRoute(Route route){
-        Intent intent = new Intent(ListMainActivity.this, TimetableDetailActivity.class);
-        intent.putExtra(ROUTE_ID, route.getId());
-        intent.putExtra(ROUTE_NAME, route.getLongName());
-
-        startActivityForResult(intent, RELOAD_SEARCH_RESULT);
-    }
-
-    public List<Route> fakeListRoute(){
-
-        List<Route> list = new ArrayList<Route>();
-        for(int i=0; i<5; i++){
-            Route route = new Route();
-            route.setAgencyId(i+"");
-            route.setId(i);
-            route.setLongName("loren cacildis mussuns");
-            route.setShortName("test of tset");
-            list.add(route);
-        }
-        return list;
     }
 
     @Override
@@ -195,46 +178,62 @@ public class ListMainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void openMapActivity(){
+    /**
+     * Call details route passing route id and name
+     *
+     * @param route
+     */
+    private void openDetailTimetableRoute(Route route){
+        Intent intent = new Intent(ListMainActivity.this, TimetableDetailActivity.class);
+        intent.putExtra(ROUTE_ID, route.getId());
+        intent.putExtra(ROUTE_NAME, route.getLongName());
 
-        Intent intent = new Intent(ListMainActivity.this, BusMapsActivity.class);
-        startActivityForResult(intent,MAP_RESULT);
+        startActivityForResult(intent, RELOAD_SEARCH_RESULT);
+    }
+
+    private void openMapActivity(){
+        Intent intent = new Intent(ListMainActivity.this, BusMapActivity.class);
+        startActivityForResult(intent, MAP_RESULT);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RELOAD_SEARCH_RESULT){
+        super.onActivityResult(requestCode, resultCode, data);
+
+       if(requestCode == RELOAD_SEARCH_RESULT){
 
             String search = loadDataSearch();
             if(search != null){
+                //load last search
                 searchField.setText(loadDataSearch());
-                searchUserStreet(loadDataSearch());
+                requestSearchRoutes(loadDataSearch());
             }
         }else if(requestCode == MAP_RESULT){
-
-            if(data != null) {
+            //execute search using street name selected in BusMapActivity
+             if(data != null) {
                 String street = data.getExtras().getString(STREET_NAME);
-                if (street != null || street.isEmpty()) {
+                if (street != null){
+                    if (!street.isEmpty()) {
 
-                    if(routes != null)
-                        routes.clear();
+                        if (routes != null)
+                            routes.clear();
 
-                    if(adapter != null)
-                        adapter.notifyDataSetChanged();
+                        if (adapter != null)
+                            adapter.notifyDataSetChanged();
 
-                    searchField.setFocusableInTouchMode(true);
-                    searchField.setText(street);
-                    searchUserStreet(street);
+                        searchField.setText(street);
+                        requestSearchRoutes(street);
+                    }
                 }
             }
+
+           searchField.setFocusableInTouchMode(true);
         }
     }
 
-    private void saveDataSearch(String search){
+    private void saveDataSearchPreference(String search){
         SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.SP_BUS), getApplicationContext().MODE_PRIVATE).edit();
-        editor.putString(ROUTE_NAME, search);
-        editor.commit();
+        editor.putString(ROUTE_NAME, search).commit();
     }
 
     private String loadDataSearch(){

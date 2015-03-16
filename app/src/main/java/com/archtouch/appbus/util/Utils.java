@@ -6,20 +6,17 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.View;
-import android.view.WindowManager;
 
 import me.drakeet.materialdialog.MaterialDialog;
 
-/**
- * Created by real on 8/3/15.
- */
+
 public class Utils {
 
-    public static ProgressDialog progressDialog;
-    public static MaterialDialog mMaterialDialog;
+    private static ProgressDialog progressDialog;
+    private static MaterialDialog mMaterialDialog;
 
     /**
-     *
+     * AlertDialog info user
      * @param title
      * @param msg
      * @param context
@@ -40,31 +37,43 @@ public class Utils {
     }
 
     /**
-     *
-     * @param mensagem
-     * @param context
+     * Show alert custom msg
+     * @param msg - Message alert
+     * @param context - title alert
      */
-    public static void showProgressDialog(CharSequence mensagem, Context context) {
+    public static void showProgressDialog(CharSequence msg, Context context) {
 
+        //dismiss progress dialog before call again
         dismissProgressDialog();
 
         progressDialog = new ProgressDialog(context);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage(mensagem);
+        progressDialog.setMessage(msg);
         progressDialog.setCancelable(false);
-//        progressDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
         progressDialog.show();
+
     }
 
+    /**
+     * Disabel progress alert msg
+     */
     public static void dismissProgressDialog() {
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
     }
 
+
+    /**
+     * Verify network connection
+     *
+     * @param context
+     * @return true = OK or false = NOTOK
+     */
     public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        ConnectivityManager connect = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connect.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 }

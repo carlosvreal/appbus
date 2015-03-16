@@ -15,10 +15,9 @@
             android:id="@+id/textItemLabel"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
-            android:gravity="left"
+            android:gravity="start"
             android:maxLines="2"
             android:padding="20dp"
-            android:text="AVENIDA PROFESSOR HENRIQUE DA SILVA FONTES"
             android:textColor="@color/material_secondary_text"
             android:textSize="16sp" />
 

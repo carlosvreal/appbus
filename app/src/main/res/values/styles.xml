@@ -15,5 +15,11 @@
         <item name="android:textColor">@color/material_white_text</item>
     </style>
 
+    <style name="StyleActionBar" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/material_white_text</item>
+        <item name="actionMenuTextColor">@color/material_primary_text</item>
+        <item name="android:textColorSecondary">@color/material_white_text</item>
+    </style>
+
 
 </resources>

@@ -1,7 +1,6 @@
 package com.archtouch.appbus.activitys;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
@@ -23,7 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class BusMapsActivity extends FragmentActivity {
+public class BusMapActivity extends FragmentActivity {
 
     private GoogleMap mMap;
     private boolean showedLocation = false;
@@ -41,6 +40,9 @@ public class BusMapsActivity extends FragmentActivity {
         setUpMapIfNeeded();
     }
 
+    /**
+     * init map
+     */
     private void setUpMapIfNeeded() {
         if (mMap == null) {
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
@@ -58,12 +60,11 @@ public class BusMapsActivity extends FragmentActivity {
            @Override
            public void onMyLocationChange(Location location) {
 
-               if (showedLocation == false) {
+               if (!showedLocation) {
                    CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
                    CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
                    mMap.moveCamera(center);
                    mMap.animateCamera(zoom);
-
                    showedLocation = true;
                }
            }
@@ -89,9 +90,7 @@ public class BusMapsActivity extends FragmentActivity {
        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
            public void onInfoWindowClick(final Marker marker) {
            String[] options = {"Ok", "Cancel"};
-           AlertDialog.Builder dialogPin = new AlertDialog.Builder(BusMapsActivity.this);
-//               itemDilog.setTitle("");
-//           dialogPin.setCancelable(false);
+           AlertDialog.Builder dialogPin = new AlertDialog.Builder(BusMapActivity.this);
            dialogPin.setItems(options, new DialogInterface.OnClickListener() {
                public void onClick(DialogInterface dialog, int which) {
                   if(which == 0) {
@@ -100,7 +99,6 @@ public class BusMapsActivity extends FragmentActivity {
                        intent.putExtra(ListMainActivity.STREET_NAME,street_name);
                        setResult(ListMainActivity.MAP_RESULT, intent);
                        finish();
-                  }else if(which == 1){
                   }
                }
            });
@@ -109,7 +107,12 @@ public class BusMapsActivity extends FragmentActivity {
        });
    }
 
-    protected String findStreetName(Marker marker){
+    /**
+     * find street name
+     * @param marker
+     * @return string of street name
+     */
+    private String findStreetName(Marker marker){
         String street = "";
         Geocoder geo = new Geocoder(this, Locale.getDefault());
         try {
