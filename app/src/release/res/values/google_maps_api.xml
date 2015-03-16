@@ -1,9 +1,0 @@
-<resources>
-    <!--
-    You can also add your credentials to an existing key, using this line:
-    89:71:26:5F:8B:80:0E:AC:1A:9F:58:C0:83:1C:9D:D2:F2:4C:62:F2;archtouch.com.appbus
-      -->
-    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-        YOUR_KEY_HERE
-    </string>
-</resources>
